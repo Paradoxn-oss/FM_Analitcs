@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Enviar dados - FM Scouting</title>
+
+    <meta name="description" content="Suba o arquivo exportado do Football Manager (CSV ou XLSX) e gere a análise completa por posição.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="FM Scouting">
+    <meta property="og:title" content="Enviar dados - FM Scouting">
+    <meta property="og:description" content="Suba o arquivo exportado do Football Manager (CSV ou XLSX) e gere a análise completa por posição.">
+    <meta property="og:image" content="{{ url_for('static', filename='apple-touch-icon.png', _external=True) }}">
+    <meta name="twitter:card" content="summary">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=Rajdhani:wght@600;700&family=Work+Sans:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#0D1013">
+</head>
+<body>
+    <div class="conta-widget conta-widget-flutuante">
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('times') }}" class="conta-link">Meus Times</a>
+            <span class="conta-nome">{{ current_user.nome }}</span>
+            <a href="{{ url_for('logout') }}" class="conta-link">Sair</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="conta-link conta-link-entrar">Entrar com Google</a>
+        {% endif %}
+    </div>
+    <div class="upload-tela">
+        <div class="upload-card">
+            <a href="{{ url_for('inicio') }}" class="upload-voltar">&larr; Início</a>
+            <span class="upload-eyebrow">Scouting FM26</span>
+            <h1 class="upload-titulo">Enviar dados</h1>
+            <p class="upload-descricao">
+                Suba o arquivo exportado do Football Manager (CSV ou XLSX)
+                para gerar a análise completa por posição.
+            </p>
+
+            {# "erro" só existe quando app.py devolve upload.html com uma
+               mensagem (arquivo inválido, colunas faltando, etc.) #}
+            {% if erro %}
+                <p class="upload-erro">{{ erro }}</p>
+            {% endif %}
+
+            <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+                <label class="upload-dropzone" id="upload-dropzone" for="arquivo-input">
+                    <span id="nome-arquivo">Clique para escolher um arquivo</span>
+                    <input
+                        type="file"
+                        name="arquivo"
+                        id="arquivo-input"
+                        accept=".csv,.xlsx,.xls"
+                    >
+                </label>
+                <button type="submit" class="upload-botao" id="botao-analisar">Analisar</button>
+            </form>
+
+            <a href="{{ url_for('elenco') }}" class="historico-voltar" style="display: block; text-align: center; margin-top: 20px;">
+                Comparar com o elenco do meu time →
+            </a>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='dropzone.js') }}"></script>
+    <script>
+        configurarDropzone(
+            document.getElementById("upload-dropzone"),
+            document.getElementById("arquivo-input"),
+            document.getElementById("nome-arquivo"),
+            "Clique para escolher um arquivo"
+        );
+
+        // Desabilita o botão ao enviar, evitando duplo clique/duplo upload
+        // enquanto o processamento (que pode levar alguns segundos) ocorre.
+        document.querySelector("form").addEventListener("submit", function() {
+            const botao = document.getElementById("botao-analisar");
+            botao.disabled = true;
+            botao.textContent = "Analisando...";
+        });
+
+    </script>
+    <script src="{{ url_for('static', filename='pwa-register.js') }}"></script>
+</body>
+</html>

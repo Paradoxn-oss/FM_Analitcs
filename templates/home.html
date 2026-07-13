@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FM Scouting</title>
+
+    <meta name="description" content="Analise exports do Football Manager: rankings por perfil, comparador de jogadores, radar, dispersão, jogadores parecidos e comparação com o elenco do seu time.">
+
+    {# Open Graph / preview ao compartilhar o link (item 17 do roadmap). #}
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="FM Scouting">
+    <meta property="og:title" content="FM Scouting">
+    <meta property="og:description" content="Analise exports do Football Manager: rankings por perfil, comparador, radar, dispersão e comparação com o elenco do seu time.">
+    <meta property="og:image" content="{{ url_for('static', filename='apple-touch-icon.png', _external=True) }}">
+    <meta name="twitter:card" content="summary">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=Rajdhani:wght@600;700&family=Work+Sans:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+
+    {# PWA (item 18 do roadmap): manifest + cor do tema na barra do navegador/instalação. #}
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#0D1013">
+</head>
+<body>
+    <div class="home-pagina">
+        <header class="home-header">
+            <span class="home-marca">FM Scouting</span>
+            <div class="conta-widget">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('times') }}" class="conta-link">Meus Times</a>
+                    <span class="conta-nome">{{ current_user.nome }}</span>
+                    <a href="{{ url_for('logout') }}" class="conta-link">Sair</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="conta-link conta-link-entrar">Entrar com Google</a>
+                {% endif %}
+            </div>
+        </header>
+
+        <section class="home-hero">
+            <span class="home-eyebrow">Scouting FM26 &middot; Volantes</span>
+            <h1 class="home-titulo">Ache o próximo reforço antes do resto da liga.</h1>
+            <p class="home-subtitulo">
+                Suba o arquivo exportado do Football Manager e transforme uma
+                planilha crua em relatório de scout de verdade: rankings por
+                perfil, comparações, radar, shortlist com notas e busca por
+                jogadores parecidos.
+            </p>
+            <a href="{{ url_for('enviar') }}" class="upload-botao home-cta">Enviar dados agora</a>
+        </section>
+
+        <section class="home-passos">
+            <div class="home-passo">
+                <span class="home-passo-numero">1</span>
+                <h3>Exporte do FM</h3>
+                <p>Na tela de scouting do jogo, exporte a lista de jogadores como CSV ou XLSX.</p>
+            </div>
+            <div class="home-passo">
+                <span class="home-passo-numero">2</span>
+                <h3>Envie o arquivo</h3>
+                <p>Não precisa de conta pra analisar — mas entrar com o Google guarda seus dados entre aparelhos.</p>
+            </div>
+            <div class="home-passo">
+                <span class="home-passo-numero">3</span>
+                <h3>Explore o relatório</h3>
+                <p>Tabelas, rankings, gráficos e shortlist já prontos, na hora.</p>
+            </div>
+        </section>
+
+        <section class="home-recursos">
+            <h2 class="home-secao-titulo">O que você encontra depois do upload</h2>
+
+            <div class="home-grid">
+                <article class="home-card">
+                    <span class="home-card-numero">01</span>
+                    <h3>Categorias</h3>
+                    <p>Todas as métricas do export organizadas em abas — Ofensivo, Passe, Desarme, Cabeceio, Físico e mais — com a identidade do jogador sempre fixa na tela.</p>
+                </article>
+                <article class="home-card">
+                    <span class="home-card-numero">02</span>
+                    <h3>Ranking por perfil</h3>
+                    <p>Três perfis prontos para volante — Marcação, Construtor, Box-to-Box — cada um com seus próprios pesos e uma Nota do Perfil de 0 a 100.</p>
+                </article>
+                <article class="home-card">
+                    <span class="home-card-numero">03</span>
+                    <h3>Perfil customizado</h3>
+                    <p>Não gostou dos pesos prontos? Monte o seu: escolha as métricas que importam pra você e o quanto cada uma pesa na nota final.</p>
+                </article>
+                <article class="home-card">
+                    <span class="home-card-numero">04</span>
+                    <h3>Dispersão &amp; radar</h3>
+                    <p>Gráficos de dispersão com presets prontos (Construção, Criação...) e um radar comparando até 2 jogadores nas métricas de um perfil.</p>
+                </article>
+                <article class="home-card">
+                    <span class="home-card-numero">05</span>
+                    <h3>Comparador</h3>
+                    <p>Até 3 jogadores lado a lado, métrica por métrica, para decidir entre opções parecidas sem trocar de tela.</p>
+                </article>
+                <article class="home-card">
+                    <span class="home-card-numero">06</span>
+                    <h3>Jogadores parecidos</h3>
+                    <p>Aponte um jogador de referência e receba os estatisticamente mais parecidos — e em qual perfil ele melhor se encaixa.</p>
+                </article>
+                <article class="home-card">
+                    <span class="home-card-numero">07</span>
+                    <h3>Favoritos &amp; notas</h3>
+                    <p>Marque jogadores com a estrela, anote observações ("observar até janeiro") e veja tudo reunido numa shortlist.</p>
+                </article>
+                <article class="home-card">
+                    <span class="home-card-numero">08</span>
+                    <h3>Filtros &amp; exportação</h3>
+                    <p>Filtre por idade, pé, nacionalidade, contrato e orçamento, busque por nome, e exporte a tabela visível para CSV.</p>
+                </article>
+                <article class="home-card">
+                    <span class="home-card-numero">09</span>
+                    <h3>Comparar com meu time</h3>
+                    <p>Envie o elenco do seu time e compare qualquer jogador escoutado com um titular específico ou com a média do seu elenco na posição.</p>
+                </article>
+            </div>
+        </section>
+
+        <footer class="home-footer">
+            <a href="{{ url_for('enviar') }}" class="home-footer-link">Enviar dados agora →</a>
+            <br>
+            <a href="{{ url_for('elenco') }}" class="home-footer-link">Comparar com meu time →</a>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='pwa-register.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ time.nome }} - FM Scouting</title>
+
+    <meta name="description" content="Temporadas enviadas para {{ time.nome }} no FM Scouting.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="FM Scouting">
+    <meta property="og:title" content="{{ time.nome }} - FM Scouting">
+    <meta property="og:description" content="Temporadas enviadas para {{ time.nome }} no FM Scouting.">
+    <meta property="og:image" content="{{ url_for('static', filename='apple-touch-icon.png', _external=True) }}">
+    <meta name="twitter:card" content="summary">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=Rajdhani:wght@600;700&family=Work+Sans:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#0D1013">
+</head>
+<body class="pagina-elenco">
+    <div class="conta-widget conta-widget-flutuante">
+        <span class="conta-nome">{{ current_user.nome }}</span>
+        <a href="{{ url_for('logout') }}" class="conta-link">Sair</a>
+    </div>
+    <div class="upload-tela">
+        <div class="upload-card elenco-card">
+            <a href="{{ url_for('times') }}" class="historico-voltar">← Meus Times</a>
+            <span class="upload-eyebrow">Scouting FM26</span>
+            <h1 class="upload-titulo">{{ time.nome }}</h1>
+
+            {% if erro %}
+                <p class="upload-erro">{{ erro }}</p>
+            {% endif %}
+
+            <div class="times-acoes-time">
+                <form action="{{ url_for('time_renomear', time_id=time.id) }}" method="POST" class="times-form-inline">
+                    <input type="text" name="nome" value="{{ time.nome }}" maxlength="255" required>
+                    <button type="submit" class="elenco-botao-secundario">Renomear</button>
+                </form>
+                <form
+                    action="{{ url_for('time_excluir', time_id=time.id) }}"
+                    method="POST"
+                    onsubmit="return confirm('Excluir {{ time.nome }} e todas as temporadas enviadas? Isso não pode ser desfeito.');"
+                >
+                    <button type="submit" class="elenco-botao-secundario times-botao-excluir">Excluir time</button>
+                </form>
+            </div>
+
+            <h2 class="painel-titulo">Enviar nova temporada</h2>
+            <form action="{{ url_for('time_temporada_upload', time_id=time.id) }}" method="POST" enctype="multipart/form-data">
+                <div class="elenco-campo">
+                    <label for="temporada-rotulo">Rótulo da temporada</label>
+                    <input type="text" id="temporada-rotulo" name="rotulo" placeholder="ex: 2025/26" maxlength="100" required>
+                </div>
+                <label class="upload-dropzone" id="temporada-dropzone" for="temporada-arquivo-input">
+                    <span id="nome-arquivo-temporada">Clique para escolher o export desta temporada</span>
+                    <input
+                        type="file"
+                        name="arquivo"
+                        id="temporada-arquivo-input"
+                        accept=".csv,.xlsx,.xls"
+                    >
+                </label>
+                <button type="submit" class="upload-botao">Enviar temporada</button>
+            </form>
+
+            <h2 class="painel-titulo">Temporadas enviadas</h2>
+            {% if time.temporadas %}
+                <ul class="times-lista">
+                    {% for temporada in time.temporadas|sort(attribute="rotulo") %}
+                        <li class="times-item">
+                            <span class="times-item-nome">{{ temporada.rotulo }}</span>
+                            <span class="times-item-detalhe">
+                                {{ temporada.num_jogadores }} jogadores · enviado em
+                                {{ temporada.atualizado_em.strftime("%d/%m/%Y %H:%M") }}
+                                {% if temporada.nome_arquivo %}· {{ temporada.nome_arquivo }}{% endif %}
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p class="upload-descricao">
+                    Comparar duas temporadas lado a lado chega no próximo
+                    bloco do roadmap (item 27) — por enquanto, esta lista
+                    só guarda o histórico de envios deste time.
+                </p>
+            {% else %}
+                <p class="upload-descricao">Nenhuma temporada enviada ainda para este time.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='dropzone.js') }}"></script>
+    <script>
+        configurarDropzone(
+            document.getElementById("temporada-dropzone"),
+            document.getElementById("temporada-arquivo-input"),
+            document.getElementById("nome-arquivo-temporada"),
+            "Clique para escolher o export desta temporada"
+        );
+    </script>
+    <script src="{{ url_for('static', filename='pwa-register.js') }}"></script>
+</body>
+</html>

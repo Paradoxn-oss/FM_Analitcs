@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Meu Time - FM Scouting</title>
+
+    <meta name="description" content="Envie o export do elenco do seu time e compare qualquer jogador escoutado com um titular específico ou com a média do seu elenco.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="FM Scouting">
+    <meta property="og:title" content="Meu Time - FM Scouting">
+    <meta property="og:description" content="Envie o export do elenco do seu time e compare qualquer jogador escoutado com um titular específico ou com a média do seu elenco.">
+    <meta property="og:image" content="{{ url_for('static', filename='apple-touch-icon.png', _external=True) }}">
+    <meta name="twitter:card" content="summary">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=Rajdhani:wght@600;700&family=Work+Sans:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#0D1013">
+</head>
+<body class="pagina-elenco">
+    <div class="conta-widget conta-widget-flutuante">
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('times') }}" class="conta-link">Meus Times</a>
+            <span class="conta-nome">{{ current_user.nome }}</span>
+            <a href="{{ url_for('logout') }}" class="conta-link">Sair</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="conta-link conta-link-entrar">Entrar com Google</a>
+        {% endif %}
+    </div>
+    <div class="upload-tela">
+        <div class="upload-card elenco-card">
+            <a href="{{ url_for('enviar') }}" class="historico-voltar">← Novo upload</a>
+            <span class="upload-eyebrow">Scouting FM26</span>
+            <h1 class="upload-titulo">Meu Time</h1>
+            <p class="upload-descricao">
+                {#
+                    O elenco é o time do próprio usuário: serve de base
+                    comparativa para os jogadores escoutados, em vez de
+                    comparar exports diferentes no tempo. Um novo upload de
+                    elenco sempre substitui o anterior (ver
+                    scouting/sessao.py: salvar_elenco).
+                #}
+                Envie o export do seu elenco atual para comparar qualquer
+                jogador escoutado com um titular específico ou com a média
+                do seu time — em vez de olhar só para os outros jogadores
+                escoutados.
+            </p>
+
+            {% if erro %}
+                <p class="upload-erro">{{ erro }}</p>
+            {% endif %}
+
+            {% if not meta_elenco %}
+                <form action="{{ url_for('elenco_upload') }}" method="POST" enctype="multipart/form-data">
+                    <label class="upload-dropzone" id="elenco-dropzone" for="arquivo-elenco-input">
+                        <span id="nome-arquivo-elenco">Clique para escolher o export do seu elenco</span>
+                        <input
+                            type="file"
+                            name="arquivo"
+                            id="arquivo-elenco-input"
+                            accept=".csv,.xlsx,.xls"
+                        >
+                    </label>
+                    <button type="submit" class="upload-botao" id="botao-enviar-elenco">Enviar elenco</button>
+                </form>
+            {% else %}
+                <div class="elenco-status">
+                    <div>
+                        <strong>{{ meta_elenco.nome_arquivo }}</strong>
+                        <span class="elenco-status-detalhe">
+                            {{ meta_elenco.num_jogadores }} jogadores · enviado em {{ meta_elenco.data_hora_formatada }}
+                        </span>
+                    </div>
+                    <form action="{{ url_for('elenco_remover') }}" method="POST">
+                        <button type="submit" class="elenco-botao-secundario">Trocar elenco</button>
+                    </form>
+                </div>
+            {% endif %}
+
+            {% if meta_elenco and tem_export_scout %}
+                <div class="elenco-comparador">
+                    <h2 class="painel-titulo">Comparar jogador escoutado com o elenco</h2>
+
+                    <div class="elenco-campo">
+                        <label for="elenco-jogador-scout">Jogador escoutado</label>
+                        <select id="elenco-jogador-scout">
+                            <option value="">Selecione um jogador</option>
+                            {% for nome in lista_jogadores_scout %}
+                                <option value="{{ nome }}">{{ nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="elenco-campo">
+                        <label for="elenco-modo">Comparar com</label>
+                        <select id="elenco-modo">
+                            <option value="media">Média do meu elenco</option>
+                            <option value="jogador">Um jogador específico do meu elenco</option>
+                        </select>
+                    </div>
+
+                    <div class="elenco-campo" id="elenco-campo-jogador-especifico" style="display: none;">
+                        <label for="elenco-jogador-elenco">Jogador do elenco</label>
+                        <select id="elenco-jogador-elenco">
+                            <option value="">Selecione um jogador do elenco</option>
+                            {% for nome in lista_jogadores_elenco %}
+                                <option value="{{ nome }}">{{ nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="button" id="elenco-comparar-botao" class="upload-botao" style="width: auto; padding: 10px 24px;">
+                        Comparar
+                    </button>
+                </div>
+
+                <div id="resultado-comparacao-elenco"></div>
+            {% elif meta_elenco and not tem_export_scout %}
+                <p class="upload-descricao">
+                    Elenco enviado! Agora <a href="{{ url_for('enviar') }}">envie um export de jogadores escoutados</a>
+                    para comparar com o seu time.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='dropzone.js') }}"></script>
+    <script>
+        // configurarDropzone já verifica se os elementos existem — no caso
+        // de já haver um elenco enviado, o formulário (e a dropzone) nem
+        // aparecem no HTML, então os three argumentos vêm como null aqui.
+        configurarDropzone(
+            document.getElementById("elenco-dropzone"),
+            document.getElementById("arquivo-elenco-input"),
+            document.getElementById("nome-arquivo-elenco"),
+            "Clique para escolher o export do seu elenco"
+        );
+    </script>
+    <script src="{{ url_for('static', filename='elenco.js') }}"></script>
+    <script src="{{ url_for('static', filename='pwa-register.js') }}"></script>
+</body>
+</html>

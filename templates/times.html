@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Meus Times - FM Scouting</title>
+
+    <meta name="description" content="Organize seus uploads do Football Manager por time e temporada, e guarde o histórico de cada um.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="FM Scouting">
+    <meta property="og:title" content="Meus Times - FM Scouting">
+    <meta property="og:description" content="Organize seus uploads do Football Manager por time e temporada, e guarde o histórico de cada um.">
+    <meta property="og:image" content="{{ url_for('static', filename='apple-touch-icon.png', _external=True) }}">
+    <meta name="twitter:card" content="summary">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=Rajdhani:wght@600;700&family=Work+Sans:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#0D1013">
+</head>
+<body class="pagina-elenco">
+    <div class="conta-widget conta-widget-flutuante">
+        <span class="conta-nome">{{ current_user.nome }}</span>
+        <a href="{{ url_for('logout') }}" class="conta-link">Sair</a>
+    </div>
+    <div class="upload-tela">
+        <div class="upload-card elenco-card">
+            <a href="{{ url_for('inicio') }}" class="historico-voltar">← Início</a>
+            <span class="upload-eyebrow">Scouting FM26</span>
+            <h1 class="upload-titulo">Meus Times</h1>
+            <p class="upload-descricao">
+                {#
+                    Um "Time" agrupa Temporadas: cada upload de export
+                    vinculado a um Time fica guardado com um rótulo (ex:
+                    "2025/26") — ver scouting/models.py e o item 26 do
+                    ROADMAP_FASE6.md.
+                #}
+                Cada time agrupa as temporadas que você for enviando —
+                útil pra comparar a evolução de um jogador ou do elenco
+                ao longo do tempo (comparação entre temporadas chega no
+                próximo bloco do roadmap).
+            </p>
+
+            {% if erro %}
+                <p class="upload-erro">{{ erro }}</p>
+            {% endif %}
+
+            <form action="{{ url_for('times_criar') }}" method="POST" class="times-form-criar">
+                <input type="text" name="nome" placeholder="Nome do time (ex: Botafogo)" maxlength="255" required>
+                <button type="submit" class="upload-botao" style="width: auto; padding: 10px 24px;">Criar time</button>
+            </form>
+
+            {% if times %}
+                <ul class="times-lista">
+                    {% for time in times %}
+                        <li class="times-item">
+                            <a href="{{ url_for('time_detalhe', time_id=time.id) }}" class="times-item-nome">
+                                {{ time.nome }}
+                            </a>
+                            <span class="times-item-detalhe">
+                                {{ time.temporadas|length }} temporada{{ "s" if time.temporadas|length != 1 else "" }}
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="upload-descricao">Você ainda não criou nenhum time.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='pwa-register.js') }}"></script>
+</body>
+</html>
